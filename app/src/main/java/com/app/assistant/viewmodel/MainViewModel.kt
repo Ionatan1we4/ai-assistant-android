@@ -97,6 +97,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 import androidx.core.net.toUri
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 
 
 class MainViewModel(application: Application, private val speak: Boolean) : AndroidViewModel(application) {
@@ -144,6 +146,14 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
 
     private val _groupList = MutableStateFlow<List<Group>>(emptyList())
     val groupList: StateFlow<List<Group>> = _groupList.asStateFlow()
+
+    private val securedPreferences = EncryptedSharedPreferences.create(
+        "secure_prefs", // A name for the preference file
+        MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC), // Master key for encryption
+        application.applicationContext,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
 
     // Text-to-Speech and Translators
     lateinit var textToSpeech: TextToSpeech
@@ -583,7 +593,7 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
         val deferredResult = CompletableDeferred<Pair<String, String>>()
 
         val urlBuilder = "https://www.googleapis.com/youtube/v3/search".toHttpUrlOrNull()?.newBuilder()
-            ?.addQueryParameter("key", BuildConfig.YOUTUBE_API_KEY)
+            ?.addQueryParameter("key", loadYoutubeKey())
             ?.addQueryParameter("q", query)
             ?.addQueryParameter("type", "video")
             ?.addQueryParameter("part", "snippet")
@@ -652,7 +662,7 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
             .build()
 
         val requestBodyJson = JSONObject().apply {
-            put("model", "llama-3.3-70b-versatile")
+            put("model", "meta-llama/llama-4-maverick-17b-128e-instruct")
             put("messages", messagesArray)
             put("temperature", 1)
             put("top_p", 1)
@@ -664,7 +674,7 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
 
         val request = Request.Builder()
             .url("https://api.groq.com/openai/v1/chat/completions")
-            .addHeader("Authorization", "Bearer ${BuildConfig.GROQ_API_KEY}")
+            .addHeader("Authorization", "Bearer ${loadChatKey()}")
             .addHeader("Content-Type", "application/json")
             .post(requestBody)
             .build()
@@ -2023,6 +2033,48 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
             "That didn’t go through. Could you retry?",
             "An error popped up. Let’s try that again."
         )
+    }
+
+    fun saveKeys(youtubeApiKey: String, chatApiKey: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            with(securedPreferences.edit()) {
+                if (youtubeApiKey.isNotBlank()) {
+                    putString("youtube_api_key", youtubeApiKey)
+                    Log.d("MainViewModel", "YouTube API Key saved securely.")
+                }
+                if (chatApiKey.isNotBlank()) {
+                    putString("chat_api_key", chatApiKey)
+                    Log.d("MainViewModel", "Chat API Key saved securely.")
+                }
+                apply()
+            }
+        }
+    }
+
+    fun loadYoutubeKey(): String? {
+        // First, try to retrieve the key from secured SharedPreferences
+        var youtubeKey = securedPreferences.getString("youtube_api_key", null)
+
+        // If the key is not in SharedPreferences, fall back to BuildConfig
+        if (youtubeKey.isNullOrBlank()) {
+            Log.d("MainViewModel", "YouTube key not found in SharedPreferences, checking BuildConfig.")
+            youtubeKey = BuildConfig.YOUTUBE_API_KEY
+        }
+
+        return youtubeKey
+    }
+
+    fun loadChatKey(): String? {
+        // First, try to retrieve the key from secured SharedPreferences
+        var chatKey = securedPreferences.getString("chat_api_key", null)
+
+        // If the key is not in SharedPreferences, fall back to BuildConfig
+        if (chatKey.isNullOrBlank()) {
+            Log.d("MainViewModel", "Chat key not found in SharedPreferences, checking BuildConfig.")
+            chatKey = BuildConfig.GROQ_API_KEY
+        }
+
+        return chatKey
     }
 
 }

@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.app.assistant"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.app.assistant"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -93,7 +93,7 @@ dependencies {
     implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.3.0-beta02")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    implementation ("com.google.mlkit:translate:17.0.2")
+    implementation ("com.google.mlkit:translate:17.0.3")
     implementation ("org.commonmark:commonmark:0.24.0")
     //implementation ("com.github.jeziellago:compose-markdown:0.5.4")
     implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc02")
@@ -101,6 +101,8 @@ dependencies {
     implementation ("org.jetbrains.kotlin:kotlin-reflect")
     implementation(libs.play.services.location)
     implementation(libs.androidx.ui.test.android)
+    implementation("androidx.security:security-crypto:1.1.0")
+    implementation(libs.androidx.runtime.saveable)
     testImplementation(libs.junit)
 //    androidTestImplementation(libs.androidx.junit)
 //    androidTestImplementation(libs.androidx.espresso.core)
@@ -110,6 +112,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //MediaPipe library
-    implementation ("com.google.mediapipe:tasks-text:0.10.14")
+    implementation ("com.google.mediapipe:tasks-text:0.10.29")
 }
-

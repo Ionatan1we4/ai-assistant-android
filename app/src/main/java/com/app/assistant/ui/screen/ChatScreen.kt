@@ -84,6 +84,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -158,6 +159,7 @@ fun SetupUI(viewModel: MainViewModel) {
         val clipboardManager = LocalClipboardManager.current
         var clearShowDialog by remember { mutableStateOf(false) }
         var deleteShowDialog by remember { mutableStateOf(false) }
+        var showSettingsDialog by remember { mutableStateOf(false) }
 
         val sheetState = rememberModalBottomSheetState()
         var showBottomSheet by viewModel.showBottomSheet
@@ -197,6 +199,20 @@ fun SetupUI(viewModel: MainViewModel) {
                             }
                         }
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        NavigationDrawerItem(
+                            label = { Text(text = "Settings") },
+                            icon = {
+                                Icon(
+                                    painter = (painterResource(id = R.drawable.ic_settings)),
+                                    contentDescription = "Settings"
+                                )
+                            },
+                            selected = false,
+                            onClick = {
+                                showSettingsDialog = true
+                                scope.launch { drawerState.close() }
+                            }
+                        )
                         NavigationDrawerItem(
                             label = { Text(text = "Start new chat") },
                             icon = {
@@ -352,8 +368,6 @@ fun SetupUI(viewModel: MainViewModel) {
                 var tapped by remember { mutableStateOf(false) }
                 val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
-                // Reset 'tapped' state if this composable part is recomposed due to isCustomUI becoming true
-                // This ensures the animation and tap logic are fresh each time it appears.
                 LaunchedEffect(Unit) {
                     tapped = false
                 }
@@ -363,7 +377,6 @@ fun SetupUI(viewModel: MainViewModel) {
                     animationSpec = tween(durationMillis = 100), // Quick animation
                     label = "boxBackgroundAlpha",
                     finishedListener = {
-                        // When animation to 0.0f (fully transparent) finishes due to a tap
                         if (tapped) {
                             backPressedDispatcher?.onBackPressed()
                         }
@@ -515,11 +528,72 @@ fun SetupUI(viewModel: MainViewModel) {
             )
         }
 
-        // Only enable BackHandler if there's a selection
+        if (showSettingsDialog) {
+            val youtubeKey = viewModel.loadYoutubeKey() ?: ""
+            val chatKey = viewModel.loadChatKey() ?: ""
+
+            SettingsDialog(
+                initialYoutubeKey = youtubeKey,
+                initialChatKey = chatKey,
+                onDismiss = { showSettingsDialog = false },
+                onSave = { ytKey, chKey ->
+                    viewModel.saveKeys(ytKey, chKey)
+                    showSettingsDialog = false
+                }
+            )
+        }
+
         BackHandler(enabled = selectedItemIndex != null) {
             selectedItemIndex = null  // Clear selection instead of handling system back
         }
     }
+}
+
+@Composable
+fun SettingsDialog(
+    initialYoutubeKey: String,
+    initialChatKey: String,
+    onDismiss: () -> Unit,
+    onSave: (String, String) -> Unit
+) {
+    var apiKey1 by rememberSaveable { mutableStateOf(initialYoutubeKey) }
+    var apiKey2 by rememberSaveable { mutableStateOf(initialChatKey) }
+
+    val context = LocalContext.current
+    val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+    val versionName = packageInfo.versionName
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Settings") },
+        text = {
+            Column {
+                TextField(
+                    value = apiKey1,
+                    onValueChange = { apiKey1 = it },
+                    label = { Text("YouTube API Key") }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = apiKey2,
+                    onValueChange = { apiKey2 = it },
+                    label = { Text("Chat API Key") }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("App Version: $versionName")
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onSave(apiKey1, apiKey2) }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
@@ -730,7 +804,6 @@ private fun UserInputField(
             }
         )
 
-        // Ripple overlay drawn *above background* but *below text*
         Canvas(
             modifier = Modifier
                 .matchParentSize()
@@ -1267,6 +1340,3 @@ private fun processNodes(node: Node, builder: AnnotatedString.Builder) {
 private fun AnnotatedString.Builder.isNotEmpty(): Boolean {
     return this.length > 0
 }
-
-
-
