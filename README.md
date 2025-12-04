@@ -141,13 +141,18 @@ End
 
 1.  **Clone the repository:**
 2.  **API Keys:**
-    This project requires API keys for YouTube and Groq services. You need to create a `local.properties` file in the root directory of your project (if it doesn't already exist) and add your keys there:
+    This project requires API keys for YouTube and Groq services.
+
+    **Option A: Using the `local.properties` file (Recommended for development)**
+    You need to create a `local.properties` file in the root directory of your project (if it doesn't already exist) and add your keys there:
     ```properties
     YOUTUBE_API_KEY=YOUR_YOUTUBE_API_KEY
     GROQ_API_KEY=YOUR_GROQ_API_KEY
     ```
     These keys are then accessed via `BuildConfig` fields in the app.
 
+    **Option B: Entering Keys via the App UI (Recommended for quick testing/user setup)**
+    Alternatively, after installing the app, you can enter the API keys directly within the application. Navigate to the **Menu** and then to the **Settings** page within the UI, and input your `YOUTUBE_API_KEY` and `GROQ_API_KEY` there.
 3.  **Ensure `local.properties` is in `.gitignore`:** The `.gitignore` file should include `local.properties` to prevent your API keys from being checked into version control.
 
 ## How to Build and Run
