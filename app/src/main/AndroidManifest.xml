@@ -44,7 +44,7 @@
             </intent-filter>
 
             <intent-filter>
-                <action android:name="android.intent.action.ACTION_VOICE_COMMAND" />
+                <action android:name="android.intent.action.VOICE_COMMAND" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
