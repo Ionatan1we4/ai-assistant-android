@@ -1,5 +1,12 @@
 package com.app.assistant
 
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.play.core.install.model.ActivityResult
+import com.google.android.play.core.appupdate.AppUpdateOptions
 import android.app.KeyguardManager
 import android.content.Context
 import android.os.Build
@@ -22,6 +29,30 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         allowOnLockScreen()
+
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+    
+    val updateLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            Log.d("Update", "Update flow started successfully")
+        } else {
+            Log.d("Update", "Update flow failed: ${result.resultCode}")
+        }
+    }
+    
+    appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+            && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
+        ) {
+            appUpdateManager.startUpdateFlowForResult(
+                appUpdateInfo,
+                updateLauncher,
+                AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
+            )
+        }
+    }
         enableEdgeToEdge()
         setContent {
             SetupUI(viewModel)
