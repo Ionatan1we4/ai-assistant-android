@@ -297,14 +297,6 @@ fun SetupUI(viewModel: MainViewModel) {
                                             )
                                         }
                                     }
-                                    IconButton(onClick = {
-                                        showBottomSheet = true
-                                    }) {
-                                        Icon(
-                                            painter = (painterResource(id = R.drawable.ic_translate)),
-                                            contentDescription = "Translate"
-                                        )
-                                    }
                                     if (viewModel.chatList.isNotEmpty()) {
                                         IconButton(onClick = { clearShowDialog = true }) {
                                             Icon(
@@ -402,80 +394,6 @@ fun SetupUI(viewModel: MainViewModel) {
             }
             else{
                 scaffoldContent()
-            }
-        }
-
-        if (showBottomSheet) {
-            var searchQuery by remember { mutableStateOf("") }
-            val filteredItems = viewModel.languages.filter {it.first.contains(searchQuery, true)}.map { it }
-            val isLanguageLoading by viewModel.isLanguageLoading.collectAsState()
-            val isTranslationEnabled by viewModel.isTranslationEnabled.collectAsState()
-
-            ModalBottomSheet(
-                onDismissRequest = {
-                    showBottomSheet = false
-                },
-                sheetState = sheetState
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp, 0.dp, 16.dp, 16.dp)) {
-                        Text(
-                            modifier = Modifier
-                                .weight(1f)
-                                .align(Alignment.CenterVertically),
-                            text = "Chat in different languages"
-                        )
-                        Switch(checked = isTranslationEnabled,
-                            onCheckedChange = { viewModel.updateTranslationEnabled(it) },
-                            modifier = Modifier.align(
-                            Alignment.CenterVertically))
-                    }
-
-
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(0.dp)
-                            .imePadding(),
-                        value = searchQuery,
-                        placeholder = { Text("Search...") },
-                        singleLine = true,
-                        onValueChange = { searchQuery = it },
-                        colors = TextFieldDefaults.colors(
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent
-                        ),
-                        enabled = isTranslationEnabled
-                    )
-
-                    if(isLanguageLoading)
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(0.dp, 16.dp, 0.dp, 0.dp),
-                    ) {
-                        items(items = filteredItems) { lang ->
-                            Text(
-                                text = lang.first,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable(enabled = isTranslationEnabled) {
-                                        if (isTranslationEnabled) {
-                                            viewModel.onItemSelected(lang.second)
-                                        }
-                                    }
-                                    .padding(16.dp),
-                            )
-                        }
-                    }
-                }
             }
         }
 
