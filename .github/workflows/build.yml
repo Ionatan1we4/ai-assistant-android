@@ -21,10 +21,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Create local.properties from secrets
+      - name: Create local.properties
         run: |
-          echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> local.properties
-          echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" >> local.properties
+          echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" > local.properties
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -36,4 +35,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
