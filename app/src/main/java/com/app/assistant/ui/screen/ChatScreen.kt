@@ -851,8 +851,13 @@ fun ConversationItem(
     isSelected: Boolean,
     onLongClick: (Int) -> Unit,
     viewModel: MainViewModel,
-    backgroundColor: Color = if (conversation.isMe) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceContainerHighest,
-    cornerRadius: Dp = 20.dp
+    backgroundColor: Color = if (conversation.isMe)
+        Color(0xFF8A5CF5)
+    else
+        Color(0xFFE9E5F5),
+        
+        
+    cornerRadius: Dp = 32.dp
 ) {
     val uriHandler = LocalUriHandler.current
     val isTranslateEnabled = viewModel.getIsTranslationEnabled()
