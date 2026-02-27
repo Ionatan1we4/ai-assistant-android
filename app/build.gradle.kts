@@ -113,4 +113,6 @@ dependencies {
 
     //MediaPipe library
     implementation ("com.google.mediapipe:tasks-text:0.10.29")
+    implementation("com.google.android.play:app-update:2.1.0")
+    implementation("com.google.android.play:app-update-ktx:2.1.0")
 }
