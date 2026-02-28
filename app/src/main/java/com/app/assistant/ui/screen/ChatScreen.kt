@@ -670,13 +670,14 @@ private fun UserInputField(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // BUTON PLUS
+                        // BUTON PLUS
                         IconButton(
                             onClick = { showOptions = true }
                         ) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_add),
+                                painter = painterResource(id = R.drawable.ic_plus),
                                 contentDescription = "Adaugă",
-                                tint = Color(0xFF8A5CF5)
+                                tint = Color.Unspecified
                             )
                         }
                         
