@@ -602,141 +602,319 @@ private fun UserInputField(
 ) {
     val isSpeaking by viewModel.isSpeaking.collectAsState()
     val isListening by viewModel.isListening.collectAsState()
+    
+    // Stări pentru butoane
+    var isThinking by remember { mutableStateOf(false) }
+    var isSearch by remember { mutableStateOf(false) }
+    var showOptions by remember { mutableStateOf(false) } // pentru butonul PLUS
 
     val containerColor = TextFieldDefaults.colors().unfocusedContainerColor
     val rippleColor  = adjustContrast(containerColor)
 
-    // State for current radius + alpha
-    val rippleRadius = remember { Animatable(0f) }
-    val rippleAlpha = remember { Animatable(0f) }
-
-    // Size of TextField (for max ripple radius)
-    var textFieldSize by remember { mutableStateOf(IntSize.Zero) }
-
-    LaunchedEffect(isListening, textFieldSize) {
-        if (isListening && textFieldSize != IntSize.Zero) {
-            val maxRadius = hypot(
-                textFieldSize.width / 2f,
-                textFieldSize.height / 2f
+    // Animație pentru unde sonore
+    val infiniteTransition = rememberInfiniteTransition()
+    val barHeights = listOf(
+        infiniteTransition.animateFloat(
+            initialValue = 4f,
+            targetValue = 20f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(500, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
             )
-            while (currentCoroutineContext().isActive) { // keep running until LaunchedEffect cancels
-                rippleRadius.snapTo(0f)
-                rippleAlpha.snapTo(0.5f)
-
-                // animate simultaneously
-                launch {
-                    rippleRadius.animateTo(
-                        targetValue = maxRadius,
-                        animationSpec = tween(1000, easing = LinearEasing)
-                    )
-                }
-                rippleAlpha.animateTo(
-                    targetValue = 0f,
-                    animationSpec = tween(1000, easing = LinearEasing)
-                )
-            }
-        } else {
-            rippleRadius.snapTo(0f)
-            rippleAlpha.snapTo(0f)
-        }
-    }
-
+        ),
+        infiniteTransition.animateFloat(
+            initialValue = 8f,
+            targetValue = 24f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(600, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            )
+        ),
+        infiniteTransition.animateFloat(
+            initialValue = 12f,
+            targetValue = 28f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(700, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            )
+        ),
+        infiniteTransition.animateFloat(
+            initialValue = 6f,
+            targetValue = 22f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(550, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            )
+        ),
+        infiniteTransition.animateFloat(
+            initialValue = 10f,
+            targetValue = 26f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(650, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            )
+        )
+    )
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .imePadding()
             .padding(8.dp)
-            .clip(RoundedCornerShape(20)) // clip ripple inside
-            .onGloballyPositioned { coords -> textFieldSize = coords.size }
+            .clip(RoundedCornerShape(20))
     ) {
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(20),
-            value = viewModel.question.value,
-            placeholder = { Text("Type here...") },
-            maxLines = 2,
-            onValueChange = { viewModel.question.value = it },
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            ),
-            trailingIcon = {
-                Row(horizontalArrangement = Arrangement.End) {
-                    val context = LocalContext.current
-                    if (isSpeaking) {
+        Column {
+            TextField(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20),
+                value = viewModel.question.value,
+                placeholder = { Text("Type here...") },
+                maxLines = 2,
+                onValueChange = { viewModel.question.value = it },
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                // ===== STÂNGA: BUTON PLUS + GÂNDIRE + CĂUTARE =====
+                leadingIcon = {
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // BUTON PLUS
+                        IconButton(
+                            onClick = { showOptions = true }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_add),
+                                contentDescription = "Adaugă",
+                                tint = Color(0xFF8A5CF5)
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.width(4.dp))
+                        
+                        // Buton Gândire
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(
+                                    if (isThinking)
+                                        Color(0xFF8A5CF5).copy(alpha = 0.2f)
+                                    else
+                                        Color.Transparent
+                                )
+                                .clickable {
+                                    isThinking = !isThinking
+                                }
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "Gândire",
+                                fontSize = 14.sp,
+                                color = if (isThinking) Color(0xFF8A5CF5) else Color.Gray
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.width(4.dp))
+                        
+                        // Buton Căutare
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(
+                                    if (isSearch)
+                                        Color(0xFF8A5CF5).copy(alpha = 0.2f)
+                                    else
+                                        Color.Transparent
+                                )
+                                .clickable {
+                                    isSearch = !isSearch
+                                }
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "Căutare",
+                                fontSize = 14.sp,
+                                color = if (isSearch) Color(0xFF8A5CF5) else Color.Gray
+                            )
+                        }
+                    }
+                },
+                // ===== DREAPTA: MICROFON (sau unde) + SEND =====
+                trailingIcon = {
+                    Row(horizontalArrangement = Arrangement.End) {
+                        val context = LocalContext.current
+                        
+                        if (isListening) {
+                            // ANIMAȚIE UNDE SONORE
+                            Row(
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .height(32.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                barHeights.forEach { height ->
+                                    Spacer(modifier = Modifier.width(2.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(3.dp)
+                                            .height(height.value.dp)
+                                            .background(
+                                                color = Color(0xFF8A5CF5),
+                                                shape = RoundedCornerShape(2.dp)
+                                            )
+                                    )
+                                }
+                            }
+                        } else {
+                            // Buton MICROFON
+                            IconButton(onClick = {
+                                viewModel.startSpeechToText(
+                                    context,
+                                    onResult = { recognizedText ->
+                                        viewModel.question.value = recognizedText
+                                        if (viewModel.question.value.isNotEmpty()) {
+                                            viewModel.processQuestion(
+                                                focusManager,
+                                                keyboardController,
+                                                context,
+                                                true
+                                            )
+                                        }
+                                    },
+                                    onPartialResult = { recognizedText ->
+                                        viewModel.question.value = recognizedText
+                                    }
+                                )
+                            }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_mic),
+                                    contentDescription = "Mic"
+                                )
+                            }
+                        }
+                        
+                        // Buton SEND
                         IconButton(onClick = {
-                            if (viewModel.textToSpeech.isSpeaking) {
-                                viewModel.stopTextToSpeech()
+                            if (viewModel.question.value.isNotEmpty()) {
+                                viewModel.processQuestion(
+                                    focusManager,
+                                    keyboardController,
+                                    context,
+                                    false
+                                )
                             }
                         }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_stop),
-                                contentDescription = "Stop"
-                            )
-                        }
-                    } else {
-                        IconButton(onClick = {
-                            viewModel.startSpeechToText(
-                                context,
-                                onResult = { recognizedText ->
-                                    viewModel.question.value = recognizedText
-                                    if (viewModel.question.value.isNotEmpty()) {
-                                        viewModel.processQuestion(
-                                            focusManager,
-                                            keyboardController,
-                                            context,
-                                            true
-                                        )
-                                    }
-                                },
-                                onPartialResult = { recognizedText ->
-                                    viewModel.question.value = recognizedText
-                                }
-                            )
-                        }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_mic),
-                                contentDescription = "Mic"
+                                imageVector = Icons.AutoMirrored.Filled.Send,
+                                contentDescription = "Send"
                             )
                         }
                     }
-                    IconButton(onClick = {
-                        if (viewModel.question.value.isNotEmpty()) {
-                            viewModel.processQuestion(
-                                focusManager,
-                                keyboardController,
-                                context,
-                                false
+                }
+            )
+            
+            // ===== OVERLAY PENTRU BUTONUL PLUS =====
+            if (showOptions) {
+                ModalBottomSheet(
+                    onDismissRequest = { showOptions = false },
+                    sheetState = rememberModalBottomSheetState()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Alege o opțiune",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF8A5CF5),
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        
+                        // Opțiune 1: Cameră
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    // Aici vei adăuga logica pentru cameră
+                                    showOptions = false
+                                }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_camera),
+                                contentDescription = "Cameră",
+                                tint = Color(0xFF8A5CF5),
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = "Cameră",
+                                fontSize = 16.sp
                             )
                         }
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Send,
-                            contentDescription = "Send"
-                        )
+                        
+                        HorizontalDivider()
+                        
+                        // Opțiune 2: Galerie
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    // Aici vei adăuga logica pentru galerie
+                                    showOptions = false
+                                }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_gallery),
+                                contentDescription = "Galerie",
+                                tint = Color(0xFF8A5CF5),
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = "Galerie",
+                                fontSize = 16.sp
+                            )
+                        }
+                        
+                        HorizontalDivider()
+                        
+                        // Opțiune 3: Fișiere
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    // Aici vei adăuga logica pentru fișiere
+                                    showOptions = false
+                                }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_file),
+                                contentDescription = "Fișiere",
+                                tint = Color(0xFF8A5CF5),
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = "Fișiere",
+                                fontSize = 16.sp
+                            )
+                        }
                     }
                 }
             }
-        )
-
-        Canvas(
-            modifier = Modifier
-                .matchParentSize()
-                .clip(RoundedCornerShape(20))
-        ) {
-            if (rippleAlpha.value > 0f) {
-                drawCircle(
-                    color = rippleColor.copy(alpha = rippleAlpha.value),
-                    radius = rippleRadius.value,
-                    center = center
-                )
-            }
         }
     }
-
 }
 
 fun adjustContrast(color: Color, factor: Float = 0.15f): Color {
