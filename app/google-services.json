@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "591804469135",
+    "project_id": "knowledge-of-ai-f9962",
+    "storage_bucket": "knowledge-of-ai-f9962.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591804469135:android:0b6cbc4117376a4da5c5fa",
+        "android_client_info": {
+          "package_name": "com.app.assistant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYzgE_EtCu4Jl46_8NW68HLCBPeM1dMXg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
