@@ -201,20 +201,6 @@ fun SetupUI(viewModel: MainViewModel) {
                         }
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                         NavigationDrawerItem(
-                            label = { Text(text = "Settings") },
-                            icon = {
-                                Icon(
-                                    painter = (painterResource(id = R.drawable.ic_settings)),
-                                    contentDescription = "Settings"
-                                )
-                            },
-                            selected = false,
-                            onClick = {
-                                showSettingsDialog = true
-                                scope.launch { drawerState.close() }
-                            }
-                        )
-                        NavigationDrawerItem(
                             label = { Text(text = "Start new chat") },
                             icon = {
                                 Icon(
