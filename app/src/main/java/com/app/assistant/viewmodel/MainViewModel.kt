@@ -112,7 +112,7 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
         private set
     var currentGroupId: Long = -1L
         private set
-    var languages : List<Pair<String,String>>
+    var languages : List<Pair<St
     var showBottomSheet = mutableStateOf(false)
         private set
     private val _isLanguageLoading = MutableStateFlow(false)
