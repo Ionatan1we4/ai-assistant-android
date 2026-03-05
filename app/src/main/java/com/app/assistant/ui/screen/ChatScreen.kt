@@ -1102,7 +1102,7 @@ private fun MakeCall(
             .align(alignment = Alignment.CenterVertically)
             .clickable {
                 uriHandler.openUri(conversation.navigationURI.toString())
-            }, markdown = conversation.engleshText
+            }, markdown = conversation.englishText
         )
     }
 }
