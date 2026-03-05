@@ -197,7 +197,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
             _isListening.value = true
         }
         initializeTextToSpeech()
-        languages = getPublicStaticFinalStringsWithNames(TranslateLanguage::class.java)
         if(speak)
             startSpeechRecognition()
         initializeTextClassifier()
@@ -271,28 +270,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
     fun stopTextToSpeech(){
         textToSpeech.stop()
         _isSpeaking.value = false;
-    }
-
-    private fun getPublicStaticFinalStringsWithNames(clazz: Class<*>): List<Pair<String, String>> {
-        val publicStaticFinalStringsWithNames = mutableListOf<Pair<String, String>>()
-
-        val fields = clazz.declaredFields
-        for (field in fields) {
-            val modifiers = field.modifiers
-            if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
-                if (field.type == String::class.java) {
-                    try {
-                        val name = field.name
-                        val value = field.get(null) as String
-                        publicStaticFinalStringsWithNames.add(Pair(name, value))
-                    } catch (e: IllegalAccessException) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        }
-
-        return publicStaticFinalStringsWithNames
     }
 
     private fun initializeTextToSpeech() {
