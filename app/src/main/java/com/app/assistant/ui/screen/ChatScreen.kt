@@ -255,13 +255,7 @@ fun SetupUI(viewModel: MainViewModel) {
                                     if (showCopyIcon) {
                                         IconButton(onClick = {
                                             selectedItemIndex?.let { index ->
-                                                val textToCopy = when {
-                                                    viewModel.getIsTranslationEnabled() -> viewModel.chatList.getOrNull(
-                                                        index
-                                                    )?.translatedText
-
-                                                    else -> viewModel.chatList.getOrNull(index)?.englishText
-                                                } ?: ""
+                                                val textToCopy = val textToCopy = viewModel.chatList.getOrNull(index)?.englishText ?: ""
                                                 clipboardManager.setText(AnnotatedString(textToCopy))
                                                 selectedItemIndex = null
                                             }
@@ -1057,7 +1051,7 @@ private fun StartNavigation(
                 .align(alignment = Alignment.CenterVertically)
                 .clickable {
                     uriHandler.openUri(conversation.navigationURI.toString())
-                }, markdown = if(isTranslateEnabled) conversation.translatedText else conversation.englishText
+                }, markdown = conversation.englishText
         )
     }
 }
@@ -1134,10 +1128,7 @@ private fun OtherCard(
     isTranslateEnabled: Boolean
 ) {
     MarkdownText(
-        markdown = if (isTranslateEnabled && conversation.translatedText.isNotBlank())
-            conversation.translatedText
-        else
-            conversation.englishText,
+        markdown = conversation.englishText,
         modifier = Modifier
             .padding(16.dp, 8.dp)
             .pointerInput(Unit) {
