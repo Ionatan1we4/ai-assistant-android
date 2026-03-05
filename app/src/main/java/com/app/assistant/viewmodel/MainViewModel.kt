@@ -109,7 +109,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
         private set
     var currentGroupId: Long = -1L
         private set
-    var languages : List<Pair<St
     var showBottomSheet = mutableStateOf(false)
         private set
     private val _isLanguageLoading = MutableStateFlow(false)
@@ -278,8 +277,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
             //_conversationListUI.add(loadingItem)
 
             val processedQuestion = cleanAndPunctuate(originalQuestion)
-
-            val processedQuestion = cleanAndPunctuate(translatedQuestionInEnglish)
             chatList.indexOfFirst { it.id == itemId }.takeIf { it != -1 }?.let { index ->
                 val updatedItem = chatList[index].copy(englishText = processedQuestion)
                 chatList.set(index, updatedItem)
