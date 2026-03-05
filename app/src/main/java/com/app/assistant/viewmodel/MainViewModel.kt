@@ -91,7 +91,6 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 import androidx.core.net.toUri
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -109,10 +108,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
         private set
     var currentGroupId: Long = -1L
         private set
-    var showBottomSheet = mutableStateOf(false)
-        private set
-    private val _isLanguageLoading = MutableStateFlow(false)
-    val isLanguageLoading: StateFlow<Boolean> = _isLanguageLoading
     private val _showToastEvent = MutableSharedFlow<String>()
     val showToastEvent = _showToastEvent.asSharedFlow()
 
@@ -217,16 +212,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
             listener = listener
         )
         classifierHelper.initClassifier()
-    }
-
-    // Function to get the current value of isTranslationEnabled
-    fun getIsTranslationEnabled(): Boolean {
-        return _isTranslationEnabled.value
-    }
-
-    // Function to get the current value of ActiveLanguageCode
-    fun getActiveLanguageCode(): String {
-        return _activeLanguageCode.value
     }
 
     fun stopTextToSpeech(){
