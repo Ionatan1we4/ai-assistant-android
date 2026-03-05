@@ -44,7 +44,6 @@ import com.app.assistant.db.SyncStateList
 import com.app.assistant.model.Contact
 import com.app.assistant.model.Conversation
 import com.app.assistant.model.Group
-import com.app.assistant.translation.TranslatorManager
 import com.app.assistant.util.Category
 import com.app.assistant.util.Constants.MAIN_CONTEXT
 import com.app.assistant.util.LockState
@@ -60,7 +59,6 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.location.SettingsClient
 import com.google.android.gms.tasks.Task
 import com.google.mediapipe.tasks.text.textclassifier.TextClassifierResult
-import com.google.mlkit.nl.translate.TranslateLanguage
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,7 +82,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
-import java.lang.reflect.Modifier
 import java.net.URI
 import java.net.URLEncoder
 import java.net.UnknownHostException
@@ -119,7 +116,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
     val isLanguageLoading: StateFlow<Boolean> = _isLanguageLoading
     private val _showToastEvent = MutableSharedFlow<String>()
     val showToastEvent = _showToastEvent.asSharedFlow()
-    private val translatorManager = TranslatorManager()
 
     //For custom ui
     private val _isCustomUI = MutableStateFlow(false)
@@ -128,16 +124,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
     //For custom ui half page
     private val _isCustomUIHalfPage = MutableStateFlow(false)
     val isCustomUIHalfPage : StateFlow<Boolean> = _isCustomUIHalfPage
-
-    // MutableStateFlow for isTranslationEnabled
-    private val _isTranslationEnabled = MutableStateFlow(
-        sharedPreferences.getBoolean("is_translation_enabled", false)
-    )
-    val isTranslationEnabled: StateFlow<Boolean> = _isTranslationEnabled
-    // MutableStateFlow for activeLanguageCode
-    private val _activeLanguageCode = MutableStateFlow(
-        sharedPreferences.getString("active_language_code", "en") ?: "en"
-    )
     private var _isSpeaking = MutableStateFlow(false)
     val isSpeaking: StateFlow<Boolean> = _isSpeaking
 
@@ -261,7 +247,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
 
     fun shutdownResources() {
         textToSpeech.shutdown()
-        translatorManager.closeTranslator()
         globalContext = null
     }
 
@@ -718,10 +703,7 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         )
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
-        if (getIsTranslationEnabled())
-            speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,getLocaleCode(getActiveLanguageCode()))
-        else
-            speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
 
         speechRecognizer.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(bundle: Bundle?) {
@@ -841,28 +823,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
         Handler(Looper.getMainLooper()).postDelayed({
             audioManager.ringerMode = originalRingerMode
         }, 800) // Wait for a short time to ensure vibration is completed
-    }
-
-
-    fun getLocaleCode(languageCode: String): String {
-        val languageCountryMapping = mapOf(
-            "af" to "ZA", "sq" to "AL", "ar" to "SA", "be" to "BY", "bg" to "BG",
-            "bn" to "BD", "ca" to "ES", "zh" to "CN", "hr" to "HR", "cs" to "CZ",
-            "da" to "DK", "nl" to "NL", "en" to "US", "eo" to "EO", "et" to "EE",
-            "fi" to "FI", "fr" to "FR", "gl" to "ES", "ka" to "GE", "de" to "DE",
-            "el" to "GR", "gu" to "IN", "ht" to "HT", "he" to "IL", "hi" to "IN",
-            "hu" to "HU", "is" to "IS", "id" to "ID", "ga" to "IE", "it" to "IT",
-            "ja" to "JP", "kn" to "IN", "ko" to "KR", "lt" to "LT", "lv" to "LV",
-            "mk" to "MK", "mr" to "IN", "ms" to "MY", "mt" to "MT", "no" to "NO",
-            "fa" to "IR", "pl" to "PL", "pt" to "BR", "ro" to "RO", "ru" to "RU",
-            "sk" to "SK", "sl" to "SI", "es" to "ES", "sv" to "SE", "sw" to "KE",
-            "tl" to "PH", "ta" to "IN", "te" to "IN", "th" to "TH", "tr" to "TR",
-            "uk" to "UA", "ur" to "PK", "vi" to "VN", "cy" to "GB"
-        )
-
-        // Retrieve the country code based on the language or fall back to Locale's default country
-        val countryCode = languageCountryMapping[languageCode] ?: Locale.getDefault().country
-        return "$languageCode-$countryCode"
     }
 
     fun markdownToPlainText(markdown: String): String {
