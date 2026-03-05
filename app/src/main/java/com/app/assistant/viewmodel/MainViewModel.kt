@@ -422,15 +422,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
         }
     }
 
-    // Suspending function for translation
-    private suspend fun TranslatorManager.translateToEnglishSuspend(text: String): String? {
-        return suspendCoroutine { continuation ->
-            translateToEnglish(text) { translatedText ->
-                continuation.resume(translatedText)
-            }
-        }
-    }
-
     private fun cleanAndPunctuate(input: String): String {
         val trimmedInput = input.trim()
 
@@ -465,19 +456,10 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
 
                 val plaintext = markdownToPlainText(it)
 
-                if (getIsTranslationEnabled()) {
-                    translatorManager.translateFromEnglish(plaintext) { translatedText ->
-                        val finalText = translatedText ?: plaintext
-                        chatList.removeAt(chatList.indexOfFirst { it.id == loadingItemId })
-                        addConversationItem(plaintext, finalText, false, category, contentURL, navigationURI)
-                        if(speak)
-                            speakResponse(finalText)
-                    }
-                } else {
-                    chatList.removeAt(chatList.indexOfFirst { it.id == loadingItemId })
-                    addConversationItem(response, "", false, category, contentURL, navigationURI)
-                    if(speak)
-                        speakResponse(plaintext)
+                chatList.removeAt(chatList.indexOfFirst { it.id == loadingItemId })
+                addConversationItem(plaintext, "", false, category, contentURL, navigationURI)
+                if(speak) {
+                    speakResponse(plaintext)
                 }
             }
         }
@@ -901,35 +883,7 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
     override fun onCleared() {
         super.onCleared()
         shutdownResources()
-    }
-
-    // Update the selected item
-    fun onItemSelected(selectedLanguageCode: String) {
-        _isLanguageLoading.value = true
-        setupTranslator(selectedLanguageCode, true)
-        triggerToast("Downloading translation model.");
-    }
-
-    private fun setupTranslator(selectedLanguageCode: String, showCompletionToast: Boolean = false) {
-        translatorManager.setupTranslators(selectedLanguageCode) { success ->
-            if (success) {
-                updateActiveLanguageCode(selectedLanguageCode)
-                _isLanguageLoading.value = false
-                showBottomSheet.value = false
-                if(showCompletionToast)
-                    triggerToast("Download completed, its recommended to use selected language keyboard.");
-            } else {
-                _isLanguageLoading.value = false
-                triggerToast("Something went wrong, model download failed.")
-            }
-        }
-    }
-
-    private fun triggerToast(message: String) {
-        viewModelScope.launch {
-            _showToastEvent.emit(message)
-        }
-    }
+    } 
 
     private fun isNegativeOrNotRequired(phrase: String): Boolean {
         val negativePatterns = listOf(
