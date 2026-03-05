@@ -163,7 +163,6 @@ fun SetupUI(viewModel: MainViewModel) {
         var showSettingsDialog by remember { mutableStateOf(false) }
 
         val sheetState = rememberModalBottomSheetState()
-        var showBottomSheet by viewModel.showBottomSheet
 
         val isCustomUI by viewModel.isCustomUI.collectAsState()
         val isCustomUIHalfPage by viewModel.isCustomUIHalfPage.collectAsState()
@@ -944,7 +943,7 @@ fun ConversationItem(
     cornerRadius: Dp = 32.dp
 ) {
     val uriHandler = LocalUriHandler.current
-    val isTranslateEnabled = viewModel.getIsTranslationEnabled()
+    val isTranslateEnabled = false
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
