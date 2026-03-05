@@ -1068,7 +1068,7 @@ private fun PlaySong(
                 uriHandler.openUri(conversation.navigationURI.toString())
             },
         model = conversation.contentURL,
-        contentDescription = conversation.enghishText
+        contentDescription = conversation.englishText
     )
 }
 
