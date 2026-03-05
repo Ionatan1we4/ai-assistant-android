@@ -97,7 +97,6 @@ dependencies {
     implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.3.0-beta02")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    implementation ("com.google.mlkit:translate:17.0.3")
     implementation ("org.commonmark:commonmark:0.24.0")
     //implementation ("com.github.jeziellago:compose-markdown:0.5.4")
     implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc02")
