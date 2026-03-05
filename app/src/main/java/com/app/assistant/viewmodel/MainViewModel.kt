@@ -200,7 +200,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
         if(speak)
             startSpeechRecognition()
         initializeTextClassifier()
-        initializeTranslator();
         loadGroup();
     }
 
@@ -226,12 +225,6 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
         }
     }
 
-    private fun initializeTranslator(){
-        if(getIsTranslationEnabled() && getActiveLanguageCode() != ""){
-            setupTranslator(getActiveLanguageCode())
-        }
-    }
-
     private fun initializeTextClassifier(){
         // Create the classification helper that will do the heavy lifting
         classifierHelper = TextClassifierHelper(
@@ -241,25 +234,9 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
         classifierHelper.initClassifier()
     }
 
-    // Function to update isTranslationEnabled and persist the value
-    fun updateTranslationEnabled(enabled: Boolean) {
-        _isTranslationEnabled.value = enabled
-        viewModelScope.launch {
-            sharedPreferences.edit().putBoolean("is_translation_enabled", enabled).apply()
-        }
-    }
-
     // Function to get the current value of isTranslationEnabled
     fun getIsTranslationEnabled(): Boolean {
         return _isTranslationEnabled.value
-    }
-
-    // Function to update activeLanguageCode and persist the value
-    fun updateActiveLanguageCode(languageCode: String) {
-        _activeLanguageCode.value = languageCode
-        viewModelScope.launch {
-            sharedPreferences.edit().putString("active_language_code", languageCode).apply()
-        }
     }
 
     // Function to get the current value of ActiveLanguageCode
@@ -302,12 +279,7 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
 
         viewModelScope.launch {
             val itemId: Long
-            val newItem: Conversation = if(getIsTranslationEnabled()){
-                Conversation(englishText = "", translatedText = originalQuestion, isMe = true)
-
-            }else{
-                Conversation(englishText = originalQuestion, translatedText = "", isMe = true)
-            }
+            val newItem = Conversation(englishText = originalQuestion, translatedText = "", isMe = true)
 
             chatList.add(newItem)
             if(_isCustomUIHalfPage.value)
@@ -320,11 +292,7 @@ class MainViewModel(application: Application, private val speak: Boolean) : Andr
             val loadingItemId = loadingItem.id
             //_conversationListUI.add(loadingItem)
 
-            val translatedQuestionInEnglish = if (getIsTranslationEnabled()) {
-                translatorManager.translateToEnglishSuspend(originalQuestion) ?: originalQuestion
-            } else {
-                originalQuestion
-            }
+            val processedQuestion = cleanAndPunctuate(originalQuestion)
 
             val processedQuestion = cleanAndPunctuate(translatedQuestionInEnglish)
             chatList.indexOfFirst { it.id == itemId }.takeIf { it != -1 }?.let { index ->
