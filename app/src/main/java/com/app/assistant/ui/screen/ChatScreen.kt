@@ -1068,7 +1068,7 @@ private fun PlaySong(
                 uriHandler.openUri(conversation.navigationURI.toString())
             },
         model = conversation.contentURL,
-        contentDescription = if(isTranslateEnabled) conversation.translatedText else conversation.englishText
+        contentDescription = conversation.enghishText
     )
 }
 
@@ -1102,7 +1102,7 @@ private fun MakeCall(
             .align(alignment = Alignment.CenterVertically)
             .clickable {
                 uriHandler.openUri(conversation.navigationURI.toString())
-            }, markdown = if(isTranslateEnabled) conversation.translatedText else conversation.englishText
+            }, markdown = conversation.engleshText
         )
     }
 }
@@ -1116,7 +1116,7 @@ private fun ShowWeather(
     MarkdownText(modifier = Modifier
         .padding(16.dp)
         .clickable { uriHandler.openUri(conversation.navigationURI.toString()) },
-        markdown = if(isTranslateEnabled) conversation.translatedText else conversation.englishText
+        markdown = conversation.englishText
     )
 }
 
