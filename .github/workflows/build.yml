@@ -27,28 +27,42 @@ jobs:
       - name: Create local.properties
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> local.properties
-          echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" >> local.properties
+          echo "YOUTUBE_API_KEY=\"dummy\"" >> local.properties
+          echo "GROQ_API_KEY=\"dummy\"" >> local.properties
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       
-      - name: Clean build
-        run: ./gradlew clean
-        
-      - name: Generate and save SHA-1
+      - name: Generate SHA-1
+        id: sha1
         run: |
+          # Rulează signingReport și salvează output-ul
           ./gradlew signingReport > signing_report.txt 2>&1 || true
-          grep -A 1 "SHA1:" signing_report.txt | head -2 | tail -1 | awk '{print $1}' > sha1.txt || echo "No SHA1 found" > sha1.txt
-          echo "SHA-1 Fingerprint:"
-          cat sha1.txt
+          
+          # Extrage SHA-1 pentru debug
+          SHA1=$(grep -A 2 "Variant: debug" signing_report.txt | grep "SHA1:" | head -1 | awk '{print $2}')
+          
+          # Dacă nu găsește, încearcă direct din keytool
+          if [ -z "$SHA1" ]; then
+            SHA1=$(keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android 2>/dev/null | grep "SHA1:" | awk '{print $2}')
+          fi
+          
+          # Salvează SHA-1 în fișier și environment
+          echo "$SHA1" > sha1.txt
+          echo "SHA1=$SHA1" >> $GITHUB_ENV
+          
+          # Afișează în log
+          echo "======================================"
+          echo "SHA-1 FINGERPRINT: $SHA1"
+          echo "======================================"
 
       - name: Upload SHA-1
         uses: actions/upload-artifact@v4
         with:
           name: sha1-key
           path: sha1.txt
-        
+          retention-days: 7
+          
       - name: Build with Gradle
         run: ./gradlew assembleDebug
 
@@ -57,3 +71,4 @@ jobs:
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
