@@ -45,51 +45,51 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 class MainActivity : ComponentActivity() {
-    private lateinit var auth: FirebaseAuth
-    private lateinit var googleSignInClient: GoogleSignInClient
+   // private lateinit var auth: FirebaseAuth
+   // private lateinit var googleSignInClient: GoogleSignInClient
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory(application, intent.getBooleanExtra("speak", false))
     }
 
-    private val googleSignInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            firebaseAuthWithGoogle(account.idToken!!)
-        } catch (e: ApiException) {
-            Log.w("Auth", "Google sign in failed", e)
-        }
-    }
+   // private val googleSignInLauncher = registerForActivityResult(
+      //  ActivityResultContracts.StartActivityForResult()
+   // ) { result ->
+      //  val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+      //  try {
+           // val account = task.getResult(ApiException::class.java)
+           // firebaseAuthWithGoogle(account.idToken!!)
+        //} catch (e: ApiException) {
+          //  Log.w("Auth", "Google sign in failed", e)
+      //  }
+   // }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        auth = Firebase.auth
+       // auth = Firebase.auth
 
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
+      //  val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+      //      .requestIdToken(getString(R.string.default_web_client_id))
+      //       requestEmail()
+       //      .build()
 
-        googleSignInClient = GoogleSignIn.getClient(this, gso)
+     //   googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        val currentUser = auth.currentUser
-        if (currentUser == null) {
-            setContent {
-                LoginScreen(
-                    onSignInClick = { signInWithGoogle() }
-                )
-            }
-            return
-        }
+      ///  val currentUser = auth.currentUser
+      ///  if (currentUser == null) {
+        //    setContent {
+         //      LoginScreen(
+         //           onSignInClick = { signInWithGoogle() }
+        //       )
+       //     }
+        //    return
+     //   }
 
         allowOnLockScreen()
         enableEdgeToEdge()
         setContent {
             SetupUI(viewModel)
-        }
+       }
 
         val appUpdateManager = AppUpdateManagerFactory.create(this)
 
@@ -116,22 +116,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun signInWithGoogle() {
-        googleSignInLauncher.launch(googleSignInClient.signInIntent)
-    }
+   // private fun signInWithGoogle() {
+    //    googleSignInLauncher.launch(googleSignInClient.signInIntent)
+   // }
 
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    Log.d("Auth", "success")
-                    recreate()
-                } else {
-                    Log.w("Auth", "failure", task.exception)
-                }
-            }
-    }
+ //   private fun firebaseAuthWithGoogle(idToken: String) {
+  //      val credential = GoogleAuthProvider.getCredential(idToken, null)
+  //      auth.signInWithCredential(credential)
+   //         .addOnCompleteListener(this) { task ->
+     //           if (task.isSuccessful) {
+      //              Log.d("Auth", "success")
+      //              recreate()
+       //         } else {
+       //             Log.w("Auth", "failure", task.exception)
+       //         }
+      //      }
+   // }
 
     private fun allowOnLockScreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
