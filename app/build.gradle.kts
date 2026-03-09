@@ -81,10 +81,9 @@ android {
 
 dependencies {
 
-    implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
-    implementation("com.google.firebase:firebase-firestore-ktx:25.1.0")
-    implementation("com.google.android.gms:play-services-auth:21.2.0")  // asta rămâne
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
+   // implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
+   // implementation("com.google.firebase:firebase-firestore-ktx:25.1.0")
+   // implementation("com.google.android.gms:play-services-auth:21.2.0")  // asta rămâne
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
