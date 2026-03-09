@@ -20,9 +20,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      
-      - name: Generate SHA-1
-        run: ./gradlew signingReport
      
       - name: Create local.properties
         run: |
@@ -30,7 +27,12 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-
+      
+      
+      - name: Generate SHA-1
+        run: ./gradlew signingReport
+      
+      
       - name: Build with Gradle
         run: ./gradlew assembleDebug
 
