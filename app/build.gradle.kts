@@ -83,7 +83,9 @@ dependencies {
    // implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
    // implementation("com.google.firebase:firebase-firestore-ktx:25.1.0")
    // implementation("com.google.android.gms:play-services-auth:21.2.0")  // asta rămâne
-    implementation(libs.androidx.core.ktx)
+    implementation("androidx.compose.material3:material3:1.2.1")
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.2.1")  // Schimbă din 1.3.0-beta02 în 1.2.1implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
