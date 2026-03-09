@@ -21,18 +21,27 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Create local.properties
         run: |
-          echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" > local.properties
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> local.properties
+          echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" >> local.properties
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       
-      
+      - name: Clean build
+        run: ./gradlew clean
+        
       - name: Generate and save SHA-1
         run: |
-          ./gradlew signingReport > signing_report.txt
-          grep "SHA1" signing_report.txt | head -1 | awk '{print $2}' > sha1.txt
+          ./gradlew signingReport > signing_report.txt 2>&1 || true
+          grep -A 1 "SHA1:" signing_report.txt | head -2 | tail -1 | awk '{print $1}' > sha1.txt || echo "No SHA1 found" > sha1.txt
+          echo "SHA-1 Fingerprint:"
+          cat sha1.txt
 
       - name: Upload SHA-1
         uses: actions/upload-artifact@v4
@@ -40,8 +49,6 @@ jobs:
           name: sha1-key
           path: sha1.txt
         
-      
-      
       - name: Build with Gradle
         run: ./gradlew assembleDebug
 
