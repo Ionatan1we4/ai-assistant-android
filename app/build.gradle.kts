@@ -30,14 +30,9 @@ android {
             localProperties.load(FileInputStream(localPropertiesFile))
         }
 
-        // Define BuildConfig fields for API keys
-        buildConfigField("String", "YOUTUBE_API_KEY",
-            "\"${localProperties.getProperty("YOUTUBE_API_KEY") ?: ""}\""
-        )
-
-        buildConfigField("String", "GROQ_API_KEY",
-            "\"${localProperties.getProperty("GROQ_API_KEY") ?: ""}\""
-        )
+        // Define BuildConfig fields with dummy values
+        buildConfigField("String", "YOUTUBE_API_KEY", "\"dummy_key\"")
+        buildConfigField("String", "GROQ_API_KEY", "\"dummy_key\"")
     }
 
     buildTypes {
@@ -49,7 +44,6 @@ android {
             )
         }
         debug {
-            // Configurație debug
         }
     }
     
@@ -79,10 +73,10 @@ android {
 }
 
 dependencies {
-    // Material3 - toate la aceeași versiune stabilă
+    // Material3 de bază - DOAR atât
     implementation("androidx.compose.material3:material3:1.2.1")
-    implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
-    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.2.1")
+    // implementation("androidx.compose.material3:material3-window-size-class:1.2.1") // Comentează dacă nu e nevoie
+    // implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.2.1") // Comentat - nu există
 
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
@@ -95,32 +89,32 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.runtime.saveable)
 
-    // Networking
+    // Networking (dacă vrei să păstrezi)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     
-    // Markdown
+    // Markdown (dacă vrei să păstrezi)
     implementation("org.commonmark:commonmark:0.24.0")
     
-    // Image Loading
+    // Image Loading (dacă vrei să păstrezi)
     implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc02")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.0-rc02")
     
     // Kotlin Reflect
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     
-    // Google Play Services
+    // Google Play Services (dacă vrei să păstrezi)
     implementation(libs.play.services.location)
     
     // Security
     implementation("androidx.security:security-crypto:1.1.0")
     
-    // MediaPipe
+    // MediaPipe (dacă vrei să păstrezi)
     implementation("com.google.mediapipe:tasks-text:0.10.29")
     
-    // Play Updates
+    // Play Updates (dacă vrei să păstrezi)
     implementation("com.google.android.play:app-update:2.1.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")
 
