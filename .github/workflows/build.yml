@@ -29,8 +29,17 @@ jobs:
         run: chmod +x ./gradlew
       
       
-      - name: Generate SHA-1
-        run: ./gradlew signingReport
+      - name: Generate and save SHA-1
+        run: |
+          ./gradlew signingReport > signing_report.txt
+          grep "SHA1" signing_report.txt | head -1 | awk '{print $2}' > sha1.txt
+
+      - name: Upload SHA-1
+        uses: actions/upload-artifact@v4
+        with:
+          name: sha1-key
+          path: sha1.txt
+        
       
       
       - name: Build with Gradle
