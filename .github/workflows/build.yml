@@ -20,7 +20,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-
+      
+      - name: Generate SHA-1
+        run: ./gradlew signingReport
+     
       - name: Create local.properties
         run: |
           echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" > local.properties
