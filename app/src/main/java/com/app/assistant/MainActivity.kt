@@ -35,14 +35,14 @@ import androidx.compose.ui.unit.sp
 import com.app.assistant.ui.screen.SetupUI
 import com.app.assistant.viewmodel.MainViewModel
 import com.app.assistant.viewmodel.MainViewModelFactory
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+//import com.google.android.gms.auth.api.signin.GoogleSignIn
+//import com.google.android.gms.auth.api.signin.GoogleSignInClient
+//import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+//import com.google.android.gms.common.api.ApiException
+//import com.google.firebase.auth.FirebaseAuth
+//import com.google.firebase.auth.GoogleAuthProvider
+//import com.google.firebase.auth.ktx.auth
+//import com.google.firebase.ktx.Firebase
 
 class MainActivity : ComponentActivity() {
    // private lateinit var auth: FirebaseAuth
