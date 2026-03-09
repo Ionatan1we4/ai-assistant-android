@@ -255,7 +255,7 @@ fun SetupUI(viewModel: MainViewModel) {
                                     if (showCopyIcon) {
                                         IconButton(onClick = {
                                             selectedItemIndex?.let { index ->
-                                                val textToCopy = val textToCopy = viewModel.chatList.getOrNull(index)?.englishText ?: ""
+                                                val textToCopy = viewModel.chatList.getOrNull(index)?.englishText ?: ""
                                                 clipboardManager.setText(AnnotatedString(textToCopy))
                                                 selectedItemIndex = null
                                             }
