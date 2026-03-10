@@ -3,8 +3,6 @@ name: Build APK
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -35,22 +33,33 @@ jobs:
 
       - name: Extract SHA-1 for Firebase
         run: |
-          # Generăm raportul care conține cheile de semnare
-          ./gradlew signingReport > signing_report.txt
+          # Rulăm raportul de semnare și îl salvăm într-un fișier
+          ./gradlew signingReport > report.txt
           
-          # Căutăm secțiunea Variant: debug și luăm prima linie cu SHA1 de după ea
-          SHA1=$(grep -A 15 "Variant: debug" signing_report.txt | grep "SHA1" | head -n 1 | cut -d' ' -f2)
+          # Extragem SHA1 folosind un regex mai sigur care ignoră culorile/spațiile
+          # Căutăm prima apariție a SHA1 care are formatul de amprentă (perechi de hex)
+          SHA1=$(grep -oE 'SHA1: [0-9A-F:]+' report.txt | head -n 1 | cut -d' ' -f2)
           
-          # Scriem în fișier și afișăm în consolă pentru verificare rapidă
+          # Dacă variabila e goală, afișăm tot raportul pentru depanare manuală
+          if [ -z "$SHA1" ]; then
+            echo "EROARE: Nu s-a găsit SHA1 în raport. Vezi output-ul de mai jos:"
+            cat report.txt
+            exit 1
+          fi
+
           echo "$SHA1" > sha1.txt
-          echo "SHA-1 extras: $SHA1"
+          
+          # AFIȘARE ÎN CONSOLĂ (O poți copia direct din Log-ul GitHub)
+          echo "========================================"
+          echo "COPIAZĂ ACEST COD ÎN FIREBASE:"
+          echo "$SHA1"
+          echo "========================================"
 
       - name: Upload SHA-1
         uses: actions/upload-artifact@v4
         with:
-          name: sha1-firebase-key
+          name: sha1-firebase
           path: sha1.txt
-          retention-days: 7
           
       - name: Build with Gradle
         run: ./gradlew assembleDebug
@@ -60,4 +69,4 @@ jobs:
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
+
