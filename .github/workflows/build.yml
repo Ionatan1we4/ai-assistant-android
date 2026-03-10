@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -32,27 +32,23 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-      
-      - name: Test if GROQ_API_KEY is base64
-        run: |
-          echo "${{ secrets.GROQ_API_KEY }}" | base64 --decode > test.txt 2>&1 || echo "Nu e base64 valid"
-          file test.txt
-      
-      - name: Decode keystore and get SHA-1
-        run: |
-          # Decodezi Base64 în fișier binar corect
-          echo "${{ secrets.GROQ_API_KEY }}" | base64 --decode > keystore.p12
 
-          # Extragi SHA-1
-          SHA1=$(keytool -list -v -keystore keystore.p12 -storetype PKCS12 -storepass android -alias android | grep "SHA1:" | awk '{print $2}')
-
-          # Salvezi în fișier pentru upload
+      - name: Extract SHA-1 for Firebase
+        run: |
+          # Generăm raportul care conține cheile de semnare
+          ./gradlew signingReport > signing_report.txt
+          
+          # Căutăm secțiunea Variant: debug și luăm prima linie cu SHA1 de după ea
+          SHA1=$(grep -A 15 "Variant: debug" signing_report.txt | grep "SHA1" | head -n 1 | cut -d' ' -f2)
+          
+          # Scriem în fișier și afișăm în consolă pentru verificare rapidă
           echo "$SHA1" > sha1.txt
-      
+          echo "SHA-1 extras: $SHA1"
+
       - name: Upload SHA-1
         uses: actions/upload-artifact@v4
         with:
-          name: sha1-key
+          name: sha1-firebase-key
           path: sha1.txt
           retention-days: 7
           
