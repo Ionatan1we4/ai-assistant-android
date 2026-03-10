@@ -40,8 +40,14 @@ jobs:
       
       - name: Decode keystore and get SHA-1
         run: |
-          echo "${{ secrets.GROQ_API_KEY }}" | base64 --decode > keystore.jks
-          keytool -list -v -keystore keystore.jks -storepass changeit -keypass android | grep "SHA1:" | head -1 | awk '{print $2}' > sha1.txt
+          # Decodezi Base64 în fișier binar corect
+          echo "${{ secrets.GROQ_API_KEY }}" | base64 --decode > keystore.p12
+
+          # Extragi SHA-1
+          SHA1=$(keytool -list -v -keystore keystore.p12 -storetype PKCS12 -storepass android -alias android | grep "SHA1:" | awk '{print $2}')
+
+          # Salvezi în fișier pentru upload
+          echo "$SHA1" > sha1.txt
       
       - name: Upload SHA-1
         uses: actions/upload-artifact@v4
