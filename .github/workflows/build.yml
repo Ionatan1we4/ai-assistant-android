@@ -33,29 +33,12 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       
-      - name: Generate SHA-1
-        id: sha1
+      - name: Extract SHA-1
         run: |
-          # Rulează signingReport și salvează output-ul
-          ./gradlew signingReport > signing_report.txt 2>&1 || true
-          
-          # Extrage SHA-1 pentru debug
-          SHA1=$(grep -A 2 "Variant: debug" signing_report.txt | grep "SHA1:" | head -1 | awk '{print $2}')
-          
-          # Dacă nu găsește, încearcă direct din keytool
-          if [ -z "$SHA1" ]; then
-            SHA1=$(keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android 2>/dev/null | grep "SHA1:" | awk '{print $2}')
-          fi
-          
-          # Salvează SHA-1 în fișier și environment
-          echo "$SHA1" > sha1.txt
-          echo "SHA1=$SHA1" >> $GITHUB_ENV
-          
-          # Afișează în log
-          echo "======================================"
-          echo "SHA-1 FINGERPRINT: $SHA1"
-          echo "======================================"
-
+          keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android 2>/dev/null | grep "SHA1:" | awk '{print $2}' > sha1.txt
+          echo "SHA1=$(cat sha1.txt)" >> $GITHUB_ENV
+          echo "SHA-1: $(cat sha1.txt)"
+      
       - name: Upload SHA-1
         uses: actions/upload-artifact@v4
         with:
