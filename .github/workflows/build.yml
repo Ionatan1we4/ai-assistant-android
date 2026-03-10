@@ -31,28 +31,27 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Extract SHA-1 for Firebase
+      - name: Extract SHA-1 from Secret Keystore
         run: |
-          # Rulăm raportul de semnare și îl salvăm într-un fișier
-          ./gradlew signingReport > report.txt
-          
-          # Extragem SHA1 folosind un regex mai sigur care ignoră culorile/spațiile
-          # Căutăm prima apariție a SHA1 care are formatul de amprentă (perechi de hex)
-          SHA1=$(grep -oE 'SHA1: [0-9A-F:]+' report.txt | head -n 1 | cut -d' ' -f2)
-          
-          # Dacă variabila e goală, afișăm tot raportul pentru depanare manuală
+          # 1. Decodăm fișierul binar din Secret
+          echo "${{ secrets.GROQ_API_KEY }}" | base64 --decode > my_keystore.p12
+
+          # 2. Extragem SHA-1 folosind keytool (comanda robustă)
+          # Folosim -v pentru detalii și căutăm linia cu SHA1
+          keytool -list -v -keystore my_keystore.p12 -storepass android -alias android > cert_info.txt
+
+          # 3. Parsăm rezultatul să luăm doar amprenta
+          SHA1=$(grep "SHA1:" cert_info.txt | head -n 1 | awk '{print $2}')
+
           if [ -z "$SHA1" ]; then
-            echo "EROARE: Nu s-a găsit SHA1 în raport. Vezi output-ul de mai jos:"
-            cat report.txt
+            echo "EROARE: Nu s-a putut extrage SHA1. Conținut cert_info.txt:"
+            cat cert_info.txt
             exit 1
           fi
 
           echo "$SHA1" > sha1.txt
-          
-          # AFIȘARE ÎN CONSOLĂ (O poți copia direct din Log-ul GitHub)
           echo "========================================"
-          echo "COPIAZĂ ACEST COD ÎN FIREBASE:"
-          echo "$SHA1"
+          echo "SHA-1 PENTRU FIREBASE: $SHA1"
           echo "========================================"
 
       - name: Upload SHA-1
@@ -60,6 +59,7 @@ jobs:
         with:
           name: sha1-firebase
           path: sha1.txt
+
           
       - name: Build with Gradle
         run: ./gradlew assembleDebug
