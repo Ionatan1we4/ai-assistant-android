@@ -33,11 +33,17 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       
-      - name: Extract SHA-1
+      - name: Test if GROQ_API_KEY is base64
         run: |
-          keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android 2>/dev/null | grep "SHA1:" | awk '{print $2}' > sha1.txt
-          echo "SHA1=$(cat sha1.txt)" >> $GITHUB_ENV
+          echo "${{ secrets.GROQ_API_KEY }}" | base64 --decode > test.txt 2>&1 || echo "Nu e base64 valid"
+          file test.txt
+      
+      - name: Decode keystore and get SHA-1
+        run: |
+          echo "${{ secrets.GROQ_API_KEY }}" | base64 --decode > keystore.jks
+          keytool -list -v -keystore keystore.jks -storepass "" -noprompt 2>&1 | grep -A 1 "SHA1:" | head -2 | tail -1 | awk '{print $1}' > sha1.txt
           echo "SHA-1: $(cat sha1.txt)"
+          echo "SHA1=$(cat sha1.txt)" >> $GITHUB_ENV
       
       - name: Upload SHA-1
         uses: actions/upload-artifact@v4
